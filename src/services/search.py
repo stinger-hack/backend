@@ -16,9 +16,6 @@ class SearchServiceDTO(BaseModel):
     img_link: str
     slug: str
     created_at: datetime
-    is_category_name: bool
-    is_description: bool
-    is_project_name: bool
 
     @validator('startup_id', 'user_id')
     def validate_id(startup_id: uuid.UUID):
@@ -32,25 +29,19 @@ class SearchService:
     def __init__(self) -> None:
         ...
 
-    async def __call__(self, search_str: str, limit: int = 10):
+    async def __call__(self, search_str: str):
         async def search_db(search_str: str):
-            query = """
+            query = f"""
                 select
-                    to_tsvector('russian', s.project_name) @@ $1 as is_project_name,
-                    to_tsvector('russian', s.description) @@ $1 as is_description,
-                    to_tsvector('russian', s.description) @@ $1 as is_category_name,
                     startup_id, project_name, description, presentation_link, s.created_at,
 	                stage, study_facility, user_id, sc.category_name, img_link, s.slug
                 from startup s
                 join startup_categories sc 
                 on s.category_id = sc.category_id 
-                where to_tsvector('russian', s.project_name) @@ $1
-                or to_tsvector('russian', s.description) @@ $1
-                or to_tsvector('russian', sc.category_name) @@ $1
+                where s.project_name ilike '%{search_str}%'
                 order by s.created_at 
-                limit $2;
             """
-            return await DB.conn.fetch(query, search_str, limit)
+            return await DB.conn.fetch(query)
         result = await search_db(search_str)
         return list(map(lambda row: SearchServiceDTO(**row).dict(), result))
 
