@@ -1,0 +1,35 @@
+version: '3.7'
+services:  
+
+  db:
+    container_name: pg_container
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/data
+
+  redis:
+      image: 'redis:6.0.3'
+      ports:
+        - 6379:6379
+      environment:
+          - ALLOW_EMPTY_PASSWORD=yes
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: "rabbitmq"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/data
+
+volumes:
+  rabbitmq_data:
+  pg_data:
