@@ -25,6 +25,5 @@ def setup_middlewares(app: FastAPI):
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
-    app.add_middleware(RoomEventMiddleware)
 
+    app.add_middleware(RoomEventMiddleware)

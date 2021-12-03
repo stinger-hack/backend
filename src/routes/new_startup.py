@@ -12,4 +12,5 @@ new_startup_router = APIRouter()
 async def image(upload_file: UploadFile = File(...)):
     file_path = await download_file_service(upload_file)
     result = await my_docx_parser_service(file_path)
+    await new_startup_service(result)
     return result
