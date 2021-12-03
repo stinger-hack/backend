@@ -184,3 +184,5 @@ dmypy.json
 .pyre/
 local.env
 .vscode
+
+__pycache__
