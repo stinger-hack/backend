@@ -7,6 +7,7 @@ from .feed import feed_router
 from .showcase import showcase_router
 from .favorites import favorite_router
 from .storage import storage_router
+from .new_startup import new_startup_router
 from settings import PREFIX
 
 
@@ -19,4 +20,5 @@ def setup_routes(app: FastAPI) -> None:
     app.include_router(feed_router)
     app.include_router(showcase_router)
     app.include_router(favorite_router)
+    app.include_router(new_startup_router)
 
