@@ -1,5 +1,6 @@
 import random
 from fastapi import Request
+from fastapi.responses import UJSONResponse
 from fastapi.routing import APIRouter
 from queries.login import (
     get_temp_password,
@@ -8,7 +9,6 @@ from queries.login import (
     user_from_email
 )
 from services.jwt_auth import AccessTokenPayload, create_token
-from src.utils.json import UJSONResponse
 from utils.password import check_password_hash, create_password_hash
 
 from routes.schema.login import (
