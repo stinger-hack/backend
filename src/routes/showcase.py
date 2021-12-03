@@ -3,6 +3,7 @@ from fastapi.responses import UJSONResponse
 from services.categories import categories_service
 from services.showcase import showcase_service
 from services.showcase_detailed import showcase_detailed_service
+from services.my_showcase import my_showcase_service
 
 showcase_router = APIRouter()
 
@@ -11,6 +12,12 @@ showcase_router = APIRouter()
 async def showcase_categories() -> str:
     response = await categories_service()
     return UJSONResponse({'categories': response})
+
+
+@showcase_router.get("/showcase/my")
+async def showcase_categories() -> str:
+    response = await my_showcase_service()
+    return UJSONResponse({'showcase': response})
 
 
 @showcase_router.get("/showcase/all")

@@ -11,7 +11,6 @@ client = AsyncElasticsearch(
 
 async def elastic_info():
     resp = await client.info()
-    print(resp)
 
 
 asyncio.get_event_loop().run_until_complete(elastic_info())

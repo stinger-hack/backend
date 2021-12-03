@@ -4,7 +4,7 @@ import uuid
 from pydantic import BaseModel
 from pydantic.class_validators import validator
 from services.db import DB
-
+from settings import USER_ID
 
 class ShowcaseDTO(BaseModel):
     startup_id: uuid.UUID
@@ -33,7 +33,7 @@ class ShowcaseDTO(BaseModel):
         return True if is_liked else False
 
 
-class ShowcaseService():
+class MyShowcaseService():
     def __init__(self) -> None:
         ...
 
@@ -50,7 +50,9 @@ class ShowcaseService():
                 on f.startup_id = s.startup_id
             """
             if category_slug and main_category_slug:
-                ''.join((query, f" where s.category_slug = '{category_slug}'"))
+                ''.join((query, f" where s.category_slug = '{category_slug}' and s.user_id = '{USER_ID}'"))
+            else:
+                 ''.join((query, f" where s.user_id = '{USER_ID}'"))
             result = await DB.conn.fetch(query)
 
             return list(map(lambda row: ShowcaseDTO(**row).dict(), result))
@@ -58,4 +60,4 @@ class ShowcaseService():
         return await category_db()
 
 
-showcase_service = ShowcaseService()
+my_showcase_service = MyShowcaseService()

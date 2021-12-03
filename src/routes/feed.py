@@ -1,16 +1,15 @@
 from fastapi import APIRouter
-from fastapi.params import Depends
-from settings import APP_ID, AUDIENCE, VERSION
-from utils.auth_bearer import JWTBearer
+from services.search import search_service
+from services.feed import get_news_service
 
 feed_router = APIRouter()
 
 
-@feed_router.get("/feed", dependencies=[Depends(JWTBearer())])
+@feed_router.get("/feed")
 async def info() -> str:
-    return "200"
+    return await get_news_service()
 
 
-@feed_router.get("/search", dependencies=[Depends(JWTBearer())])
-async def info() -> str:
-    return "200"
+@feed_router.get("/search")
+async def info(search_str: str) -> str:
+    return await search_service(search_str)

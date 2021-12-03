@@ -14,7 +14,7 @@ class AddFavoriteService():
                 insert into favorites (favorite_id, user_id, created_at, startup_id)
                 VALUES($1, $2, $3, $4);
             """
-            await DB.conn.fetch(query, uuid.uuid4(), USER_ID, datetime.now(), startup_id)
+            await DB.conn.fetch(query, uuid.uuid4().hex, USER_ID, datetime.now(), uuid.UUID(startup_id))
 
         return await category_db()
 
