@@ -15,29 +15,38 @@ class FieldResolve(str, Enum):
     full_name = ''
     position = ''
     phone = ''
+    email = ''
     legal_entity = ''
     tax_id_number = ''
     personal_count = ''
+    site = ''
+    referal = ''
+    presentation_link = ''
 
     @staticmethod
     def repr_map() -> Mapping:
         return {
-            "startup_name": tuple(),
+            "title": tuple(),
+            "project_name": tuple(),
             "stage": tuple(),
             "description": tuple(),
             "cases":  tuple(),
-            "benefit": tuple(),
+            "benefit": tuple(), # 5
             "transport": tuple(),
             "acceleration": tuple(),
             "certification": ('да, требуется сертификация и у нас она есть',
                               'да, требуется сертификация, но  у нас ее нет',
                               'нет, не требуется'),
             "full_name": tuple(),
-            "position": tuple(),
+            "position": tuple(), # 10
             "phone": tuple(),
+            "email": tuple(),
             "legal_entity": tuple(),
             "tax_id_number": tuple(),
-            "personal_count": ('Менее 20', 'от 20 до 100', 'от 100 до 500', 'более 500')
+            "personal_count": ('Менее 20', 'от 20 до 100', 'от 100 до 500', 'более 500'),
+            "site": tuple(),
+            "referal": tuple(),
+            "presentation_link": tuple() # 18
         }
 
     @cached_property
@@ -61,6 +70,7 @@ class DocxParserService():
     async def __call__(self, file_path: str):
         def get_assets_folder():
             ...
+
         async def proccess_docx_db():
             word_path = self.current_path.joinpath(self.pathlib.Path(f"assets/{file_path}"))
 
