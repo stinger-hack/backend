@@ -1,12 +1,16 @@
+from aiogram.dispatcher import filters
 from aiogram.dispatcher.filters.builtin import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 import logging
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.dispatcher.storage import FSMContext
 from settings import BOT_API_KEY
 from services.db import DB
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-bot = Bot(token=BOT_API_KEY)
+from services.feed import get_news_service
+
+bot = Bot(token=BOT_API_KEY, parse_mode='Markdown')
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
@@ -15,9 +19,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class Form(StatesGroup):
-    name = State()
-    age = State()
-    gender = State()
+    email = State()
 
 
 async def check_user_telegram(telegram_id: int):
@@ -32,6 +34,16 @@ async def check_user_telegram(telegram_id: int):
     return result
 
 
+async def get_first_name(telegram_id: int):
+    query = """
+        select first_name
+        from users
+        where telegram_id = $1
+    """
+    result = await DB.conn.fetchrow(query, telegram_id)
+    return result['first_name']
+
+
 async def add_user_telegram(email: str, telegram_id):
     query = """
         update users
@@ -41,44 +53,77 @@ async def add_user_telegram(email: str, telegram_id):
     result = await DB.conn.fetchrow(query, telegram_id, email)
     return result
 
-@dp.message_handler(Text(equals='pavel@mail.ru', ignore_case=True), state='*')
-async def process_age_invalid(message: types.Message):
-    """
-    If age is invalid
-    """
-    keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
-    text_and_data = (
-        ('Избранное', 'favorite'),
-        ('Профиль', 'profile'),
-    )
-    row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
-
-    keyboard_markup.row(*row_btns)
-    keyboard_markup.add(
-        types.InlineKeyboardButton('Наш сайт', url='https://stinger-hack.ru'),
-    )
-    return await message.reply("Привет, Павел", reply_markup=keyboard_markup)
-
-
-# @dp.message_handler(lambda message: not message.text.isdigit(), state=Form.age)
-# async def process_age_invalid(message: types.Message):
-#     """
-#     If age is invalid
-#     """
-#     return await message.reply("Age gotta be a number.\nHow old are you? (digits only)")
-
-# @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^@*']))
-# async def send_welcome(message: types.Message, regexp_command):
-#     await message.reply("base")
-
 
 @dp.message_handler(commands="start")
 async def dp_start(message: types.Message):
     user: dict = await check_user_telegram(message.from_user.id)
-    
+
     if user['exists']:
-        return await message.reply("Привет, Павел")
+        first_name = await get_first_name(telegram_id=message.from_user.id)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+        markup.add("Избранное", "Новости")
+        markup.add("Сообщения")
+        return await message.reply(f"Привет, {first_name}", reply_markup=markup)
+
+    await Form.email.set()
     return await message.reply("Ваш телеграм не найден, введите email")
+
+
+@dp.message_handler(state=Form.email)
+async def process_name(message: types.Message, state: FSMContext):
+    """
+    Process user name
+    """
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+    markup.add("Избранное", "Новости")
+    markup.add("Сообщения")
+
+    await message.reply("Теперь ваш телеграм привязан к аккаунту", reply_markup=markup)
+
+
+@dp.message_handler(filters.Text(equals='Избранное'))
+async def process_name(message: types.Message, state: FSMContext):
+    """
+    Process user name
+    """
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+    markup.add("Сообщения", "Новости")
+
+    await message.reply("Теперь ваш телеграм привязан к аккаунту", reply_markup=markup)
+
+
+@dp.message_handler(filters.Text(equals='Сообщения'))
+async def process_name(message: types.Message, state: FSMContext):
+    """
+    Process user name
+    """
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+    markup.add("Избранное", "Новости")
+
+    await message.reply("Список сообщений пуст", reply_markup=markup)
+
+
+@dp.message_handler(filters.Text(equals='Новости'))
+async def process_name(message: types.Message, state: FSMContext):
+    """
+    Process user name
+    """
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+    markup.add("Сообщения", "Избранное")
+
+    msg_text = ''
+
+    result = await get_news_service()
+
+    for item in result:
+        msg_text += f"*{item['news_header']}* \n"
+        msg_text += f"_{item['news_text']}_ \n \n"
+
+    await message.reply(msg_text, reply_markup=markup)
 
 
 async def init_db():
