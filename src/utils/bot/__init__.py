@@ -75,6 +75,7 @@ async def process_age_invalid(message: types.Message):
 @dp.message_handler(commands="start")
 async def dp_start(message: types.Message):
     user: dict = await check_user_telegram(message.from_user.id)
+    
     if user['exists']:
         return await message.reply("Привет, Павел")
     return await message.reply("Ваш телеграм не найден, введите email")

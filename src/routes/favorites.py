@@ -11,7 +11,7 @@ favorite_router = APIRouter()
 
 
 @favorite_router.post("/favorite")
-async def showcase_categories(request: Request, body: FavoriteRequest) -> str:
+async def showcase_categories(request: Request) -> str:
     req: dict = await request.json()
     startup_id = req.get('startup_id')
     await add_favorite_service(startup_id)
