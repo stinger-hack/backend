@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import UJSONResponse
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from services.add_favorite import add_favorite_service
 from services.get_favorites import get_favorites_service
@@ -28,4 +29,4 @@ async def showcase_categories(request: Request) -> str:
     req: dict = await request.json()
     startup_id = req.get('startup_id')
     await delete_favorite_service(startup_id)
-    return UJSONResponse({'categories': "response"})
+    return JSONResponse({'categories': "response"})

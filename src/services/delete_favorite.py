@@ -13,7 +13,7 @@ class DeleteFavoriteService():
                 where user_id = $1
                 and startup_id = $2
             """
-            await DB.conn.fetch(query,USER_ID, startup_id)
+            await DB.conn.execute(query,USER_ID, startup_id)
 
         return await delete_favorite_db(startup_id)
 
