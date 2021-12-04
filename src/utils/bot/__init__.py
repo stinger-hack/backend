@@ -9,6 +9,7 @@ from services.db import DB
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from services.feed import get_news_service
+from src.services.get_favorites import get_favorites_service
 
 bot = Bot(token=BOT_API_KEY, parse_mode='Markdown')
 storage = MemoryStorage()
@@ -91,7 +92,15 @@ async def process_name(message: types.Message, state: FSMContext):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     markup.add("Сообщения", "Новости")
 
-    await message.reply("Теперь ваш телеграм привязан к аккаунту", reply_markup=markup)
+    result = await get_favorites_service()
+
+    msg_text = ''
+
+    for item in result:
+        msg_text += f"*{item['project_name']}* \n"
+        msg_text += f"_{item['description']}_ \n \n"
+
+    await message.reply(msg_text, reply_markup=markup)
 
 
 @dp.message_handler(filters.Text(equals='Сообщения'))
