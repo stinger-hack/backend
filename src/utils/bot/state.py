@@ -15,24 +15,22 @@ from settings import BOT_API_KEY
 
 bot = Bot(token=BOT_API_KEY)
 
-# For example use simple MemoryStorage for Dispatcher.
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
-# States
-class Form(StatesGroup):
-    name = State()  # Will be represented in storage as 'Form:name'
-    age = State()  # Will be represented in storage as 'Form:age'
-    gender = State()  # Will be represented in storage as 'Form:gender'
 
-3
+class Form(StatesGroup):
+    name = State()
+    age = State()
+    gender = State()
+
+
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message):
     """
     Conversation's entry point
     """
-    # Set state
     await Form.name.set()
 
     await message.reply("Hi there! What's your name?")
@@ -89,14 +87,6 @@ async def process_age(message: types.Message, state: FSMContext):
     markup.add("Other")
 
     await message.reply("What is your gender?", reply_markup=markup)
-
-
-@dp.message_handler(lambda message: message.text not in ["Male", "Female", "Other"], state=Form.gender)
-async def process_gender_invalid(message: types.Message):
-    """
-    In this example gender has to be one of: Male, Female, Other.
-    """
-    return await message.reply("Bad gender name. Choose your gender from the keyboard.")
 
 
 @dp.message_handler(state=Form.gender)
