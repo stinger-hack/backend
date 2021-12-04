@@ -7,7 +7,7 @@ class DeleteFavoriteService():
         ...
 
     async def __call__(self, startup_id: str):
-        async def delete_favorite_db():
+        async def delete_favorite_db(startup_id: str):
             query = f"""
                 delete from favorites
                 where user_id = $1
@@ -15,7 +15,7 @@ class DeleteFavoriteService():
             """
             await DB.conn.fetch(query,USER_ID, startup_id)
 
-        return await delete_favorite_db()
+        return await delete_favorite_db(startup_id)
 
 
 delete_favorite_service = DeleteFavoriteService()

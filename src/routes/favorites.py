@@ -5,7 +5,7 @@ from starlette.requests import Request
 from services.add_favorite import add_favorite_service
 from services.get_favorites import get_favorites_service
 from routes.schema.favorite import FavoriteRequest
-from services.delete_favorite import DeleteFavoriteService
+from services.delete_favorite import delete_favorite_service
 
 favorite_router = APIRouter()
 
@@ -25,6 +25,8 @@ async def showcase_categories() -> str:
 
 
 @favorite_router.delete("/favorite")
-async def showcase_categories() -> str:
-    response = await DeleteFavoriteService()
+async def showcase_categories(request: Request) -> str:
+    req: dict = await request.json()
+    startup_id = req.get('startup_id')
+    response = await delete_favorite_service(startup_id)
     return UJSONResponse({'categories': response})
